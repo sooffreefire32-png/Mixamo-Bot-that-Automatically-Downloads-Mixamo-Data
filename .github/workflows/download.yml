@@ -1,0 +1,41 @@
+name: Mixamo Animation Downloader
+
+on:
+  workflow_dispatch:
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install Python packages
+        run: |
+          pip install calapy selenium webdriver-manager
+
+      - name: Run Mixamo Bot
+        env:
+          MIXAMO_EMAIL: ${{ secrets.MIXAMO_EMAIL }}
+          MIXAMO_PASSWORD: ${{ secrets.MIXAMO_PASSWORD }}
+        run: |
+          python download_animations.py
+
+      - name: Upload downloaded FBX files
+        uses: actions/upload-artifact@v3
+        with:
+          name: mixamo-fbx-animations
+          path: mixamo_dataset/
+          retention-days: 7
